@@ -1,18 +1,21 @@
 import socket
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("localhost", 9999))
+server.bind(('localhost', 1111))
 
 server.listen()
 
-client, addr = server.accept()
+client, address = server.accept()
 
-done = False
+flag = True
 
-while not done:
-    msg = print(client.recv(1024).decode('utf-8'))
+while flag:
+    msg = client.recv(1024).decode('utf-8')
     if msg == 'quit':
-        done = True
+        flag = False
     else:
         print(msg)
-    client.send(input("Message: ").encode('utf-8'))
+    client.send(input('Server: ').encode('utf-8'))
+
+client.close()
+server.close()
