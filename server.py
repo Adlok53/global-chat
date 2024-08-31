@@ -1,50 +1,18 @@
-import threading
 import socket
 
-host = '127.0.0.1' # localhost
-port = 55555
-
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((host, port))
+server.bind(("localhost", 9999))
+
 server.listen()
 
-clients = []
-nicknames = []
+client, addr = server.accept()
 
-def broadcast(message):
-    for client in clients:
-        client.send(message)
+done = False
 
-def handle(client):
-    while True:
-        try:
-            message = client.recv(1024)
-            broadcast(message)
-        except:
-            index = clients.index(client)
-            clients.remove(client)
-            client.close()
-            nickname = nicknames[index]
-            broadcast(f"{nickname} left the chat!".encode('ascli'))
-            nicknames.remove(nickname)
-            break
-
-def receive():
-    while True:
-        client, address = server.accept()
-        print(f"Connected with {str(address)}")
-
-        client.send('NICK'.encode('ascli'))
-        nickname = client.recv(1024).decode('ascli')
-        nicknames.append(nickname)
-        clients.append(client)
-
-        print(f'Nickname of the client is {nickname}!')
-        broadcast(f'{nickname} joined the chat'.encode('ascli'))
-        client.send('Connected to the server!'.encode('ascli'))
-
-        thread = threading.Thread(target=handle, args=(client))
-        thread.start()
-
-print("Server is listening...")
-receive()
+while not done:
+    msg = print(client.recv(1024).decode('utf-8'))
+    if msg == 'quit':
+        done = True
+    else:
+        print(msg)
+    client.send(input("Message: ").encode('utf-8'))
